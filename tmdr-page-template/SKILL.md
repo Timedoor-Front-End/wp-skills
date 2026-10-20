@@ -21,6 +21,10 @@ Reusable components live in `template-parts/components/` with PascalCase filenam
 
 Prefer `wp_get_attachment_image()` for WordPress attachment images; use a raw `<img>` only for external, generated, or otherwise non-attachment sources. This keeps images benefiting from WordPress's responsive `srcset`/`sizes` output instead of a flat `<img>` that ignores registered image sizes.
 
+Pass `'loading' => 'lazy'` explicitly (`wp_get_attachment_image($image['ID'] ?? 0, 'full', false, array('loading' => 'lazy'))`), and `'eager'` only for above-the-fold heroes. The templates build pages from components without running The Loop, so WordPress's automatic loading heuristics treat every image as header content and drop `loading="lazy"` (and add `fetchpriority="high"` to an arbitrary first image) — without the explicit attribute a page loads all its photos up front.
+
+When an ACF image may be empty and the design has a placeholder from `assets/images/`, branch inline: `wp_get_attachment_image(...)` when set, otherwise `<img src="<?php echo esc_url(get_theme_file_uri('assets/images/' . $file)); ?>" alt="..." loading="lazy" decoding="async">`. `esc_url()` encodes the spaces some asset file names contain.
+
 ```php
 components('ThemeButton', array(
     'text' => 'Contact',

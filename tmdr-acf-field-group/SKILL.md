@@ -26,6 +26,8 @@ Client ACF field groups are stored as JSON files in `acf-json/`. This keeps fiel
 
 ## Reading fields in templates
 
+Read ACF data with ACF's native functions directly (`get_field()`, `the_field()`, `have_rows()` / `the_row()` / `get_sub_field()`). Do not create wrapper helpers for reading fields — the old `tmdr_field()` / `tmdr_option()` wrappers were removed so every call site shows exactly which ACF API and which `post_id` it reads from. Defaults go inline at the call site, e.g. `get_field('cta_title', 'room-settings') ?: ''`.
+
 Repeaters and flexible content use `have_rows()` / `the_row()` / `get_sub_field()`; single fields (text, image, gallery, link) use `get_field()`. Guard array returns (`is_array()`) and empty values before rendering, since an empty repeater or unset field returns `false`/`array()` rather than throwing — unguarded output produces silent gaps or PHP notices instead of a clear failure.
 
 ACF image fields use `return_format: "array"`; render through `wp_get_attachment_image()` with the attachment ID and an explicit fallback when empty, so the image benefits from WordPress's responsive `srcset`/`sizes` handling and the page never ships a broken `<img>` tag when the field is empty:
@@ -53,8 +55,12 @@ Nested repeaters: the inner `have_rows('entries')` call runs inside the outer ro
 
 ACF option pages are registered in `inc/functions-acf.php` (keep these in PHP, not JSON) — they're global/site-wide settings rather than per-template content, so they don't fit the "one field group per template" JSON convention above:
 
-- `Theme Settings → Login`
-- `Theme Settings → Page Links`
+- `Theme Settings → Login` (`post_id` `login`)
+- `Theme Settings → Page Links` (`post_id` `page-links`)
+- `Theme Settings → General Settings` (`post_id` `general-settings`) — booking URL, WhatsApp, email, address, socials, opening hours
+- `Rooms → Room Settings` (`room-settings`), `Experiences → Experience Settings` (`experience-settings`), `Offers → Offer Settings` (`offer-settings`) — shared CTA / "others" copy for the single templates
+
+Read an option field by passing the page's `post_id` as the second argument: `get_field('booking_url', 'general-settings')`, `get_field('cta_title', 'offer-settings')`.
 
 `getPageData($page_title)` reads the Page Links repeater. It returns an error string when no mapping exists; guard the result before accessing `->ID`.
 

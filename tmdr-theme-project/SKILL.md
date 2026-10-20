@@ -62,11 +62,13 @@ The implementation intentionally uses `REMOTE_ADDR`; do not trust forwarded head
 - WordPress intermediate image sizes are disabled by the theme; uploads may remain full-size.
 - `lazysizes` and `gsap` are installed but not currently imported.
 - `acf-json/` contains synced page field groups; global option groups remain registered in PHP.
+- Templates call ACF and Polylang functions directly (`get_field()`, `pll__()`), so both plugins must stay active; deactivating either fatals the front end (no fallback layer by design).
 
 ## Working rules
 
 1. Read the relevant skill (`tmdr-page-template`, `tmdr-acf-field-group`) before changing that area.
 2. Search existing helpers, components, mixins, and imports before writing new code.
+   Exception: never add thin wrapper helpers around native functions. Call WordPress, ACF and Polylang directly in the template (`get_field()`, `wp_get_attachment_image()`, `pll__()`, `pll_the_languages()`, `wp_get_nav_menu_items()`, `get_posts()`, `sanitize_title()`, `wpautop()`, `wp_kses_post()`). A helper in `inc/functions-custom.php` is only justified for site-specific logic shared by several templates (e.g. `tmdr_whatsapp_url()`, `tmdr_active_offer_ids()`, `tmdr_faq_groups()`).
 3. Trace the complete caller flow for behavior changes.
 4. Make the smallest change in the correct source file.
 5. Preserve naming, BEM structure, and JS initialization format.
