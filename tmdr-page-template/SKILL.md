@@ -5,6 +5,8 @@ description: Use when creating or editing WordPress page templates or reusable P
 
 # Page templates and PHP components
 
+Templates call ACF (and Polylang on multilingual sites) directly, so confirm the required plugins first, following `tmdr-theme-project` → "Plugin prerequisites". Do not write templates that call a plugin's functions until that plugin is confirmed available. If it is missing, ask the user to install and activate it themselves; never install it for them.
+
 ## Standard templates
 
 At the theme root: `index.php`, `single.php`, `archive.php`, `search.php`, `page.php`, `404.php`, `comments.php`, `header.php`, `footer.php`.
@@ -104,7 +106,7 @@ Escape everything at the point of output:
 
 ## Text strings and multilingual sites
 
-Polylang is optional. Check the project (see `tmdr-theme-project`, "Multilingual sites") before writing any user-facing string.
+Polylang is optional. Before writing any user-facing string, determine whether the site is multilingual by following `tmdr-theme-project` → "Plugin prerequisites" and "Multilingual sites" (a TGMPA entry alone does not prove Polylang is installed or needed). Ask once if it cannot be inferred.
 
 - **Multilingual site:** use Polylang directly: `pll__('Book now')` for translatable strings (register them in `inc/functions-polylang.php` with `pll_register_string()`), `pll_the_languages()` for the switcher in the navbar, `pll_home_url()` instead of `home_url('/')` where the home link must stay in the current language. Use the existing `getCurrentLang()` helper when you need the language code.
 - **Single-language site:** write plain text or `esc_html__('Book now', 'theme-text-domain')`. Do not call any `pll_*` function.

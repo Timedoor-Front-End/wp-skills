@@ -5,6 +5,8 @@ description: Use when creating or editing ACF field groups, fields, tabs, repeat
 
 # ACF JSON integration
 
+**ACF Pro is required.** Repeaters, flexible content, galleries, option pages, and CPT/taxonomy JSON are Pro features, and templates fatal without the plugin. Before writing any group, confirm ACF Pro is installed and active, following `tmdr-theme-project` → "Plugin prerequisites" (infer from the conversation, WP-CLI, or the repo; otherwise ask once). If it is missing, stop, ask the user to install and activate it themselves (do not install it for them), and wait for their confirmation before generating field groups.
+
 Client ACF field groups are stored as JSON files in `acf-json/`. This keeps field configuration under version control and reviewable in diffs, instead of living only in the database.
 
 **Where things live:**
@@ -13,7 +15,7 @@ Client ACF field groups are stored as JSON files in `acf-json/`. This keeps fiel
 | --- | --- |
 | Client page/template field groups | JSON in `acf-json/` |
 | Option pages and their field groups | PHP in `inc/functions-acf.php` |
-| CPTs / taxonomies | `post_type_*.json` / `taxonomy_*.json` (ACF Pro), or `register_post_type()` / `register_taxonomy()` in code (free ACF) |
+| CPTs / taxonomies | `post_type_*.json` / `taxonomy_*.json` (ACF Pro) |
 
 ## Rules
 
