@@ -17,6 +17,7 @@ Before generating code that depends on a plugin, confirm it is available. Do thi
 | --- | --- | --- |
 | ACF Pro | Any `get_field()` call, `acf-json/` groups, option pages, repeaters, flexible content, gallery, CPT/taxonomy JSON | Always |
 | Polylang (+ Polylang Slug) | `pll_*` calls, language switcher | Multilingual sites only |
+| WooCommerce | Shop, product, cart, checkout, My Account, `woocommerce/` template overrides (see `tmdr-woocommerce`) | Shop sites only |
 
 **Detection order (stop at the first answer):**
 
@@ -42,6 +43,7 @@ Before generating code that depends on a plugin, confirm it is available. Do thi
 inc/                    Theme setup, helpers, plugins, ACF, Polylang, auth
 page-templates/         Optional page templates
 template-parts/         Reusable PHP components
+woocommerce/            WooCommerce template overrides (shop sites only; created per project)
 assets/css/             Plain CSS (layout.css, pages/*.css, admin/*.css)
 assets/js/              Plain JS (layout.js, pages/*.js)
 assets/images/          Theme images
@@ -71,6 +73,7 @@ This project writes plain CSS and plain JS directly in `assets/css/` and `assets
 6. `functions-polylang.php`
 7. `functions-theme-setup.php`
 8. `functions-basic-auth.php`
+9. `functions-woocommerce.php` (shop sites only; created per project, see `tmdr-woocommerce`)
 
 Main responsibilities:
 
@@ -81,6 +84,7 @@ Main responsibilities:
 - `functions-polylang.php`: Polylang string registration, already wrapped in `if (function_exists('pll_register_string'))`, so it is harmless without the plugin.
 - `functions-theme-setup.php`: theme setup, menus, logo, login branding, admin schemes.
 - `functions-basic-auth.php`: staging Basic Auth and IP whitelist.
+- `functions-woocommerce.php`: all custom WooCommerce PHP (theme support, hooks, checkout fields, pricing, emails, AJAX) in one file, on shop sites only.
 
 Do not change load order without checking hook dependencies.
 
@@ -124,7 +128,7 @@ Adapted from the starter's own coding standards (`assets/dummy/intro.php`, heade
 ## Working rules
 
 1. Confirm required plugins per "Plugin prerequisites" before writing code that depends on them.
-2. Read the relevant skill (`tmdr-page-template`, `tmdr-acf-field-group`) before changing that area.
+2. Read the relevant skill (`tmdr-page-template`, `tmdr-acf-field-group`, `tmdr-woocommerce`) before changing that area.
 3. Search existing helpers, components, and CSS/JS before writing new code. The SCSS mixins and functions described in `assets/dummy/intro.php` (`color()`, `vwUnit()`, `typo()` and others) are not available in a plain-CSS project; write the equivalent CSS directly.
    Exception: never add thin wrapper helpers around native functions. Call WordPress and ACF directly in the template (`get_field()`, `wp_get_attachment_image()`, `wp_get_nav_menu_items()`, `get_posts()`, `sanitize_title()`, `wpautop()`, `wp_kses_post()`), and Polylang directly on multilingual sites (`pll__()`, `pll_the_languages()`). A helper in `inc/functions-custom.php` is only justified for site-specific logic shared by several templates (e.g. `tmdr_whatsapp_url()`, `tmdr_active_offer_ids()`, `tmdr_faq_groups()`).
 4. Trace the complete caller flow for behavior changes.
