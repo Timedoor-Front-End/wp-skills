@@ -1,6 +1,6 @@
 ---
 name: tmdr-theme-project
-description: Use when working in this theme at all — project requirements, repository layout, functions.php load order, plugin prerequisites (ACF Pro, Polylang) and when to ask whether they are installed, whether the site is multilingual (Polylang) or not, and known intentional constraints. Consult this first for any task in the theme, even small edits.
+description: Use when working in this theme at all, including starting a new project (cloning the team's theme starter into a tmdrx<project_name> folder) — project requirements, repository layout, functions.php load order, plugin prerequisites (ACF Pro, Polylang) and when to ask whether they are installed, whether the site is multilingual (Polylang) or not, and known intentional constraints. Consult this first for any task in the theme, even small edits.
 ---
 
 # Project
@@ -8,6 +8,45 @@ description: Use when working in this theme at all — project requirements, rep
 Classic WordPress starter theme for Timedoor projects.
 
 Requirements: WordPress, PHP 7.4+, ACF Pro. Polylang is **optional**, only for multilingual sites (see "Plugin prerequisites" and "Multilingual sites").
+
+## Starting a new project
+
+Every new project starts from the team's theme starter. Applies only when the task is a **new project** and the theme is not already in the workspace. If the theme is already there (marker files: `functions.php` that loads `inc/`, and `acf-json/index.php`), skip this section and work in the existing repo. Never clone over an existing theme.
+
+Starter repo: `https://bitbucket.org/timedoor/fe-starter-wp.git`, branch `vanilla` (always this branch).
+
+**Folder name:** `tmdrx` + the project name, lowercase, no spaces or special characters, for example `tmdrxbalivilla`. It lives in `wp-content/themes/`. If the project name is unclear, ask.
+
+**Ask first, before cloning anything:** one short question, offering yes / no: "Have you already created the theme folder for this project?"
+
+- **Yes:** ask for its name or path. Check it is empty.
+  - Empty: clone into it with `git clone --branch vanilla --single-branch https://bitbucket.org/timedoor/fe-starter-wp.git .` run from inside that folder.
+  - Not empty and it contains the starter's marker files: do not clone, treat it as an existing theme.
+  - Not empty and no marker files: stop and ask the user what is in it. Never delete or overwrite its contents.
+- **No:** ask for the project name if you do not have it, create `wp-content/themes/tmdrx<project_name>`, then clone into it:
+
+  ```bash
+  cd wp-content/themes
+  git clone --branch vanilla --single-branch https://bitbucket.org/timedoor/fe-starter-wp.git tmdrx<project_name>
+  ```
+
+  If the workspace is not a WordPress install (no `wp-content/themes/`), ask where the folder should go instead of guessing.
+
+**After cloning:**
+
+- Confirm the marker files exist (`functions.php`, `inc/`, `acf-json/index.php`).
+- Remove the starter's git history so the project starts with a new repository. Before deleting, confirm you are inside the folder you just cloned into and that `git remote get-url origin` points at `fe-starter-wp`; if either check fails, stop and ask. Then:
+
+  ```bash
+  rm -rf .git
+  git init
+  ```
+
+  Delete only the `.git` folder in the project root, never anything else, and never in a folder that was already a project before this clone.
+- Do not add a remote or make the first commit unless the user asks. Tell them the repository is fresh with no remote, so they must add the project's own remote before pushing.
+- Then continue with "Plugin prerequisites" before generating code.
+
+**If the clone fails** (private repo, authentication prompt, or the network blocks the host): do not look for workarounds, and never ask for or store passwords or tokens in the chat. Give the user the exact command above to run themselves, using their own Bitbucket credentials, and ask them to confirm when the folder is in place.
 
 ## Plugin prerequisites
 
