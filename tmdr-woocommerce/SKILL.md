@@ -9,7 +9,7 @@ WooCommerce lets a theme replace a plugin template by placing a file with the **
 
 ## Prerequisite: WooCommerce must be installed
 
-Confirm WooCommerce is installed and active before writing any code that depends on it, following `tmdr-theme-project` → "Plugin prerequisites" (conversation, then WP-CLI `wp plugin list --status=active --field=name`, then repo evidence, then ask once).
+Confirm WooCommerce is installed and active before writing any code that depends on it, following `tmdr-theme-project` → "Plugin prerequisites" (conversation, then WP-CLI `wp plugin list --status=active --field=name`, then repo evidence, then ask once). The question follows `tmdr-theme-project` → "Asking the user": one question per message, with choices (**Yes / No / Not sure**).
 
 If it is missing or the answer is "not sure", ask the user to install and activate it themselves (WP Admin → Plugins). Do not install it for them: no `wp plugin install`, no Composer, no downloading plugin files into the repo. Wait for their confirmation before generating WooCommerce code. Never add `function_exists()` fallbacks around WooCommerce calls.
 
@@ -44,7 +44,7 @@ When the user wants to change a WooCommerce template, copy **only the specific f
 Procedure:
 
 1. **Identify the exact file** using the map below (or by looking in the plugin's `templates/` folder).
-2. **Find the plugin source.** Look for `wp-content/plugins/woocommerce/templates/` relative to the WordPress root (the theme lives in `wp-content/themes/<theme>/`). If the plugin folder is not available in this environment, ask the user to upload or paste the original file. Do not write the template from memory: the markup and `@version` differ between WooCommerce releases, and an invented copy can drop required hooks.
+2. **Find the plugin source.** Look for `wp-content/plugins/woocommerce/templates/` relative to the WordPress root (the theme lives in `wp-content/themes/<theme>/`). If the plugin folder is not available in this environment, ask the user for the original file with one question and choices (**"I'll upload the file"** / **"I'll paste it"** / **"Stop here"**). Do not write the template from memory: the markup and `@version` differ between WooCommerce releases, and an invented copy can drop required hooks.
 3. **Copy that one file**, creating the subfolders as needed. Example for the single product title:
 
    ```bash
@@ -56,7 +56,7 @@ Procedure:
    The relative path must match exactly: `templates/single-product/title.php` becomes `woocommerce/single-product/title.php` in the theme.
 4. **Keep the file header intact**, including the docblock with `@version` and the `defined('ABSPATH') || exit;` guard. The `@version` is how WooCommerce detects an outdated override. Do not bump it by hand.
 5. **Make the smallest edit** that achieves the change. Keep every `do_action()` / `apply_filters()` call WooCommerce placed there, because plugins and other code hook into them. Mark your changes with a short comment (`// TMDR: reason`) so a future diff against a newer plugin version is easy.
-6. **Follow the theme rules inside the override:** escape all output (`tmdr-page-template` → "Escaping output"), render images with `wp_get_attachment_image()` (`tmdr-page-template` → "Images"), use native ACF calls with the product ID for custom fields (`get_field('badge_text', $product->get_id())`), and follow the project's single-language or Polylang mode (`tmdr-theme-project` → "Multilingual sites"). Keep WooCommerce's own text domain (`'woocommerce'`) for strings that already use it.
+6. **Follow the theme rules inside the override:** escape all output (`tmdr-page-template` → "Escaping output"), render images with `wp_get_attachment_image()` (`tmdr-page-template` → "Images"), use native ACF calls with the product ID for custom fields (`get_field('badge_text', $product->get_id())`), and follow the project's single-language or Polylang mode (`tmdr-theme-project` → "Multilingual sites"). Keep WooCommerce's own text domain (`'woocommerce'`) for strings that already use it. Custom ACF fields follow `tmdr-acf-field-group`: English editor text, no default values, and an empty field renders nothing (no empty tag, no placeholder). Define the variables for each block of markup in a `<?php ... ?>` block directly above it, not at the top of the file.
 7. **Wire styles if needed** (see "Styling and assets").
 
 If a template override replaces a file that already exists in the theme's `woocommerce/` folder, edit that file in place instead of copying again.
@@ -145,7 +145,7 @@ These classic hooks apply to the shortcode checkout. The block checkout has its 
 
 Recent WooCommerce versions create the Cart and Checkout pages with **blocks** by default. The PHP files `cart/cart.php` and `checkout/form-checkout.php` only apply to the **classic shortcode** versions (`[woocommerce_cart]`, `[woocommerce_checkout]`). Overriding them does nothing on a block-based page.
 
-Before changing cart or checkout layout, find out which version the site uses (open the Cart/Checkout page in the editor, or ask the user), then:
+Before changing cart or checkout layout, find out which version the site uses. Check the page content first: with WP-CLI, `wp option get woocommerce_checkout_page_id` (and `woocommerce_cart_page_id`), then `wp post get <ID> --field=post_content`. The `[woocommerce_cart]` / `[woocommerce_checkout]` shortcodes mean classic; `wp:woocommerce/cart` / `wp:woocommerce/checkout` blocks mean blocks. Only if that cannot be determined, ask one question with choices (**Shortcode (classic)** / **Blocks** / **Not sure**). Then:
 
 - **Shortcode pages:** override the PHP templates as above.
 - **Block pages:** restyle with CSS, or use the supported block filters. Do not override the PHP templates and expect them to render.
@@ -161,6 +161,8 @@ if (is_woocommerce() || is_cart() || is_checkout() || is_account_page()) {
 ```
 
 Narrow the condition when only some screens need the file (`is_shop()`, `is_product()`, `is_cart()`, `is_checkout()`, `is_account_page()`). Handles must be unique across the theme. Scripts follow the same rules as other page scripts: classic deferred script, no `import` / `export`, initialization inside `DOMContentLoaded`.
+
+**Global parts of the shop are not WooCommerce-screen styles.** `woocommerce.css` loads only on WooCommerce screens. Anything that renders on every page, such as a mini cart or cart count inside `TheNavbar`, is global: put its styles and scripts in `global.css` / `global.js`, registered outside every condition (see `tmdr-theme-project` → "Global or page-specific?"), and run the mechanical check from that section when the step is done.
 
 Use BEM classes for markup you add. Do not rename or remove WooCommerce's own classes and IDs in overridden templates (`woocommerce-`, `product`, `.single_add_to_cart_button`, form field IDs): WooCommerce's JavaScript and extensions select them.
 
@@ -182,3 +184,4 @@ Use BEM classes for markup you add. Do not rename or remove WooCommerce's own cl
 - Ask the user to open **WooCommerce → Status → System status → Templates**. Overridden files are listed there, and any marked outdated need to be compared against the plugin's current version of that file.
 - Load the affected page (shop, product, cart, checkout, My Account) and check the browser console and the PHP error log.
 - After a WooCommerce update, compare each override's `@version` with the plugin's current file and merge new markup in.
+- End the task with the "What next?" question from `tmdr-theme-project` → "Build steps and suggesting the next step": one or two lines on what was done, then 2 to 3 choices with the recommended one first and **"Stop here"**.
